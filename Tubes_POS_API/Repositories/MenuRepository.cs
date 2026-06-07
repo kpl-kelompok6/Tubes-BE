@@ -44,6 +44,7 @@ public sealed class MenuRepository : IMenuRepository
         existingMenu.Price = menu.Price;
         existingMenu.Category = menu.Category;
         existingMenu.IsAvailable = menu.IsAvailable;
+        existingMenu.ImageUrl = menu.ImageUrl;
         existingMenu.UpdatedAt = DateTime.UtcNow;
 
         _db.SaveChanges();

@@ -23,9 +23,9 @@ public sealed class AppDbContext : DbContext
             entity.HasIndex(m => m.Category);
 
             entity.HasData(
-                new Menu { Id = 1, Name = "Nasi Goreng Spesial", Price = 25000m, Category = "Makanan", IsAvailable = true },
-                new Menu { Id = 2, Name = "Es Teh Manis", Price = 5000m, Category = "Minuman", IsAvailable = true },
-                new Menu { Id = 3, Name = "Kopi Hitam", Price = 10000m, Category = "Minuman", IsAvailable = true }
+                new Menu { Id = 1, Name = "Nasi Goreng Spesial", Price = 25000m, Category = "Makanan", IsAvailable = true, ImageUrl = "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400" },
+                new Menu { Id = 2, Name = "Es Teh Manis", Price = 5000m, Category = "Minuman", IsAvailable = true, ImageUrl = "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400" },
+                new Menu { Id = 3, Name = "Kopi Hitam", Price = 10000m, Category = "Minuman", IsAvailable = true, ImageUrl = "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400" }
             );
         });
 
