@@ -22,6 +22,9 @@ public sealed class Menu
 
     public bool IsAvailable { get; set; } = true;
 
+    [System.ComponentModel.DataAnnotations.MaxLength(2048)]
+    public string? ImageUrl { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime? UpdatedAt { get; set; }
