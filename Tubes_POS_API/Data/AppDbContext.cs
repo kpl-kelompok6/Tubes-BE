@@ -24,9 +24,9 @@ public sealed class AppDbContext : DbContext
             entity.HasIndex(m => m.Category);
 
             entity.HasData(
-                new Menu { Id = 1, Code = "MENU-20250101-a1b2c3d4", Name = "Nasi Goreng Spesial", Price = 25000m, Category = "Makanan", IsAvailable = true },
-                new Menu { Id = 2, Code = "MENU-20250101-e5f6g7h8", Name = "Es Teh Manis", Price = 5000m, Category = "Minuman", IsAvailable = true },
-                new Menu { Id = 3, Code = "MENU-20250101-i9j0k1l2", Name = "Kopi Hitam", Price = 10000m, Category = "Minuman", IsAvailable = true }
+                new Menu { Id = 1, Code = "MENU-20250101-a1b2c3d4", Name = "Nasi Goreng Spesial", Price = 25000m, Category = "Makanan", IsAvailable = true, ImageUrl = "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400" },
+                new Menu { Id = 2, Code = "MENU-20250101-e5f6g7h8", Name = "Es Teh Manis", Price = 5000m, Category = "Minuman", IsAvailable = true, ImageUrl = "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400" },
+                new Menu { Id = 3, Code = "MENU-20250101-i9j0k1l2", Name = "Kopi Hitam", Price = 10000m, Category = "Minuman", IsAvailable = true, ImageUrl = "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400" }
             );
         });
 
@@ -49,7 +49,6 @@ public sealed class AppDbContext : DbContext
                   .HasForeignKey(ti => ti.MenuId)
                   .OnDelete(DeleteBehavior.Restrict);
         });
-
         modelBuilder.Entity<Payment>(entity =>
         {
             entity.HasIndex(p => p.Code).IsUnique();

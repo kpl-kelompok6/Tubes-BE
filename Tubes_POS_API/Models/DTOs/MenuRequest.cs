@@ -20,4 +20,7 @@ public sealed class MenuRequest
     public string Category { get; set; } = string.Empty;
 
     public bool IsAvailable { get; set; } = true;
+
+    [MaxLength(2048)]
+    public string? ImageUrl { get; set; }
 }

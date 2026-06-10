@@ -60,7 +60,8 @@ public class MenuController : ControllerBase
             Description = request.Description,
             Price = request.Price,
             Category = request.Category,
-            IsAvailable = request.IsAvailable
+            IsAvailable = request.IsAvailable,
+            ImageUrl = request.ImageUrl
         };
 
         _menuService.Add(menu);
@@ -82,7 +83,8 @@ public class MenuController : ControllerBase
             Description = request.Description,
             Price = request.Price,
             Category = request.Category,
-            IsAvailable = request.IsAvailable
+            IsAvailable = request.IsAvailable,
+            ImageUrl = request.ImageUrl
         };
 
         _menuService.Update(menu);
@@ -117,6 +119,7 @@ public class MenuController : ControllerBase
             Price = menu.Price,
             Category = menu.Category,
             IsAvailable = menu.IsAvailable,
+            ImageUrl = menu.ImageUrl,
             CreatedAt = menu.CreatedAt,
             UpdatedAt = menu.UpdatedAt
         };
