@@ -66,11 +66,13 @@ public class MenuController : ControllerBase
 
         _menuService.Add(menu);
 
-        return Ok(new ApiResponse<MenuResponse>
+        var response = new ApiResponse<MenuResponse>
         {
             Message = "Menu berhasil ditambahkan.",
             Data = MapToResponse(menu)
-        });
+        };
+
+        return CreatedAtAction(nameof(GetById), new { id = menu.Id }, response);
     }
 
     [HttpPut("{id}")]
