@@ -19,13 +19,14 @@ public sealed class AppDbContext : DbContext
 
         modelBuilder.Entity<Menu>(entity =>
         {
+            entity.HasIndex(m => m.Code).IsUnique();
             entity.HasIndex(m => m.Name);
             entity.HasIndex(m => m.Category);
 
             entity.HasData(
-                new Menu { Id = 1, Name = "Nasi Goreng Spesial", Price = 25000m, Category = "Makanan", IsAvailable = true },
-                new Menu { Id = 2, Name = "Es Teh Manis", Price = 5000m, Category = "Minuman", IsAvailable = true },
-                new Menu { Id = 3, Name = "Kopi Hitam", Price = 10000m, Category = "Minuman", IsAvailable = true }
+                new Menu { Id = 1, Code = "MENU-20250101-a1b2c3d4", Name = "Nasi Goreng Spesial", Price = 25000m, Category = "Makanan", IsAvailable = true },
+                new Menu { Id = 2, Code = "MENU-20250101-e5f6g7h8", Name = "Es Teh Manis", Price = 5000m, Category = "Minuman", IsAvailable = true },
+                new Menu { Id = 3, Code = "MENU-20250101-i9j0k1l2", Name = "Kopi Hitam", Price = 10000m, Category = "Minuman", IsAvailable = true }
             );
         });
 
@@ -51,6 +52,7 @@ public sealed class AppDbContext : DbContext
 
         modelBuilder.Entity<Payment>(entity =>
         {
+            entity.HasIndex(p => p.Code).IsUnique();
             entity.HasIndex(p => p.TransactionId).IsUnique();
             entity.HasOne(p => p.Transaction)
                   .WithOne(t => t.Payment)
@@ -60,6 +62,7 @@ public sealed class AppDbContext : DbContext
 
         modelBuilder.Entity<TransactionHistory>(entity =>
         {
+            entity.HasIndex(h => h.Code).IsUnique();
             entity.HasIndex(h => h.TransactionDate);
         });
     }

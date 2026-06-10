@@ -111,6 +111,7 @@ public class MenuController : ControllerBase
         return new MenuResponse
         {
             Id = menu.Id,
+            Code = menu.Code,
             Name = menu.Name,
             Description = menu.Description,
             Price = menu.Price,

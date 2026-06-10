@@ -4,6 +4,8 @@ public sealed class TransactionHistoryResponse
 {
     public int Id { get; set; }
 
+    public string Code { get; set; } = string.Empty;
+
     public int TransactionId { get; set; }
 
     public DateTime TransactionDate { get; set; }
