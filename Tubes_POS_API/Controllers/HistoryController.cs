@@ -81,6 +81,19 @@ namespace Tubes_POS_API.Controllers
             });
         }
 
+        // GET api/history/by-payment/{method}
+        [HttpGet("by-payment/{method}")]
+        public async Task<ActionResult<ApiResponse<List<TransactionHistoryResponse>>>> GetByPaymentMethod(string method)
+        {
+            var result = await _historyService.GetByPaymentMethodAsync(method);
+
+            return Ok(new ApiResponse<List<TransactionHistoryResponse>>
+            {
+                Message = $"Ditemukan {result.Count} riwayat transaksi.",
+                Data = result.Select(MapToResponse).ToList()
+            });
+        }
+
         private static TransactionHistoryResponse MapToResponse(TransactionHistory history)
         {
             return new TransactionHistoryResponse
