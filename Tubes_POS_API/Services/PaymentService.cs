@@ -47,6 +47,9 @@ public sealed class PaymentService : IPaymentService
         if (request.PaidAmount < totalAmount)
         {
             _stateMachine.Fail();
+            transaction.Status = TransactionStatus.Cancelled;
+            transaction.UpdatedAt = DateTime.UtcNow;
+            await _db.SaveChangesAsync();
             throw new ArgumentException("Uang tidak cukup.");
         }
 
