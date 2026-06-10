@@ -1,50 +1,44 @@
 ﻿using Tubes_POS_API.Models.DTOs;
 
-namespace Tubes_POS_API.Services
+namespace Tubes_POS_API.Services;
+
+public class ReportService
 {
-    public class ReportService
+    private readonly HistoryService _historyService;
+
+    public ReportService(HistoryService historyService)
     {
-        // Reuse HistoryService, tidak perlu akses DB langsung
-        private readonly HistoryService _historyService;
+        _historyService = historyService;
+    }
 
-        public ReportService(HistoryService historyService)
+    public async Task<ReportResponse> GetReportAsync(DateTime start, DateTime end)
+    {
+        var data = await _historyService.GetByDateRangeAsync(start, end);
+
+        int totalTransaksi = data.Count;
+        decimal totalPendapatan = data.Sum(h => h.TotalAmount);
+        decimal rataRata = totalTransaksi > 0 ? totalPendapatan / totalTransaksi : 0;
+
+        string[] metodePembayaran = { "cash", "debit", "qris", "transfer" };
+
+        var breakdown = new Dictionary<string, decimal>();
+        foreach (var metode in metodePembayaran)
         {
-            _historyService = historyService;
+            decimal total = data
+                .Where(h => h.PaymentMethod.ToLower() == metode)
+                .Sum(h => h.TotalAmount);
+
+            breakdown[metode] = total;
         }
 
-        // Buat laporan sederhana dari rentang tanggal
-        public async Task<ReportResponse> GetReportAsync(DateTime start, DateTime end)
+        return new ReportResponse
         {
-            var data = await _historyService.GetByDateRangeAsync(start, end);
-
-            // Hitung total
-            int totalTransaksi = data.Count;
-            decimal totalPendapatan = data.Sum(h => h.TotalAmount);
-            decimal rataRata = totalTransaksi > 0 ? totalPendapatan / totalTransaksi : 0;
-
-            // Table-driven: breakdown per metode pembayaran
-            string[] metodePembayaran = { "cash", "debit", "qris", "transfer" };
-
-            var breakdown = new Dictionary<string, decimal>();
-            foreach (var metode in metodePembayaran)
-            {
-                decimal total = data
-                    .Where(h => h.PaymentMethod.ToLower() == metode)
-                    .Sum(h => h.TotalAmount);
-
-                breakdown[metode] = total;
-            }
-
-            // Return sebagai object anonim (mudah dibaca)
-            return new ReportResponse
-            {
-                StartDate = start,
-                EndDate = end,
-                TotalTransaksi = totalTransaksi,
-                TotalPendapatan = totalPendapatan,
-                RataRata = rataRata,
-                Breakdown = breakdown
-            };
-        }
+            StartDate = start,
+            EndDate = end,
+            TotalTransaksi = totalTransaksi,
+            TotalPendapatan = totalPendapatan,
+            RataRata = rataRata,
+            Breakdown = breakdown
+        };
     }
 }

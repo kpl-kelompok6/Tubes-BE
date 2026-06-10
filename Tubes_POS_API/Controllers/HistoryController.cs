@@ -4,93 +4,105 @@ using Tubes_POS_API.Models;
 using Tubes_POS_API.Models.DTOs;
 using Tubes_POS_API.Services;
 
-namespace Tubes_POS_API.Controllers
+namespace Tubes_POS_API.Controllers;
+
+[ApiController]
+[Route("api/histories")]
+public class HistoryController : ControllerBase
 {
-    [ApiController]
-    [Route("api/histories")]
-    public class HistoryController : ControllerBase
+    private readonly HistoryService _historyService;
+    private readonly ReportService _reportService;
+
+    public HistoryController(HistoryService historyService, ReportService reportService)
     {
-        private readonly HistoryService _historyService;
-        private readonly ReportService _reportService;
+        _historyService = historyService;
+        _reportService = reportService;
+    }
 
-        public HistoryController(HistoryService historyService, ReportService reportService)
+    // GET api/history
+    [HttpGet]
+    public async Task<ActionResult<ApiResponse<List<TransactionHistoryResponse>>>> GetAll()
+    {
+        var result = await _historyService.GetAllAsync();
+
+        return Ok(new ApiResponse<List<TransactionHistoryResponse>>
         {
-            _historyService = historyService;
-            _reportService = reportService;
-        }
+            Message = $"Ditemukan {result.Count} riwayat transaksi.",
+            Data = result.Select(MapToResponse).ToList()
+        });
+    }
 
-        // GET api/history
-        [HttpGet]
-        public async Task<ActionResult<ApiResponse<List<TransactionHistoryResponse>>>> GetAll()
+    // GET api/history/5
+    [HttpGet("{id}")]
+    public async Task<ActionResult<ApiResponse<TransactionHistoryResponse>>> GetById(int id)
+    {
+        var result = await _historyService.GetByIdAsync(id);
+
+        if (result == null)
         {
-            var result = await _historyService.GetAllAsync();
-
-            return Ok(new ApiResponse<List<TransactionHistoryResponse>>
+            return NotFound(new ApiResponse<object>
             {
-                Message = $"Ditemukan {result.Count} riwayat transaksi.",
-                Data = result.Select(MapToResponse).ToList()
+                Success = false,
+                Message = "Transaksi tidak ditemukan.",
+                Data = null
             });
         }
 
-        // GET api/history/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<ApiResponse<TransactionHistoryResponse>>> GetById(int id)
+        return Ok(new ApiResponse<TransactionHistoryResponse>
         {
-            var result = await _historyService.GetByIdAsync(id);
+            Message = "Detail riwayat transaksi.",
+            Data = MapToResponse(result)
+        });
+    }
 
-            if (result == null)
-            {
-                return NotFound(new ApiResponse<object>
-                {
-                    Success = false,
-                    Message = "Transaksi tidak ditemukan.",
-                    Data = null
-                });
-            }
+    // GET api/history/filter?start=2025-01-01&end=2025-12-31
+    [HttpGet("filter")]
+    public async Task<ActionResult<ApiResponse<List<TransactionHistoryResponse>>>> Filter(DateTime start, DateTime end)
+    {
+        var result = await _historyService.GetByDateRangeAsync(start, end);
 
-            return Ok(new ApiResponse<TransactionHistoryResponse>
-            {
-                Message = "Detail riwayat transaksi.",
-                Data = MapToResponse(result)
-            });
-        }
-
-        // GET api/history/filter?start=2025-01-01&end=2025-12-31
-        [HttpGet("filter")]
-        public async Task<ActionResult<ApiResponse<List<TransactionHistoryResponse>>>> Filter(DateTime start, DateTime end)
+        return Ok(new ApiResponse<List<TransactionHistoryResponse>>
         {
-            var result = await _historyService.GetByDateRangeAsync(start, end);
+            Message = $"Ditemukan {result.Count} riwayat transaksi.",
+            Data = result.Select(MapToResponse).ToList()
+        });
+    }
 
-            return Ok(new ApiResponse<List<TransactionHistoryResponse>>
-            {
-                Message = $"Ditemukan {result.Count} riwayat transaksi.",
-                Data = result.Select(MapToResponse).ToList()
-            });
-        }
+    // GET api/history/report?start=2025-01-01&end=2025-12-31
+    [HttpGet("report")]
+    public async Task<ActionResult<ApiResponse<ReportResponse>>> GetReport(DateTime start, DateTime end)
+    {
+        var result = await _reportService.GetReportAsync(start, end);
 
-        // GET api/history/report?start=2025-01-01&end=2025-12-31
-        [HttpGet("report")]
-        public async Task<ActionResult<ApiResponse<ReportResponse>>> GetReport(DateTime start, DateTime end)
+        return Ok(new ApiResponse<ReportResponse>
         {
-            var result = await _reportService.GetReportAsync(start, end);
+            Message = "Laporan transaksi.",
+            Data = result
+        });
+    }
 
-            return Ok(new ApiResponse<ReportResponse>
-            {
-                Message = "Laporan transaksi.",
-                Data = result
-            });
-        }
+    // GET api/history/by-payment/{method}
+    [HttpGet("by-payment/{method}")]
+    public async Task<ActionResult<ApiResponse<List<TransactionHistoryResponse>>>> GetByPaymentMethod(string method)
+    {
+        var result = await _historyService.GetByPaymentMethodAsync(method);
 
-        private static TransactionHistoryResponse MapToResponse(TransactionHistory history)
+        return Ok(new ApiResponse<List<TransactionHistoryResponse>>
         {
-            return new TransactionHistoryResponse
-            {
-                Id = history.Id,
-                TransactionId = history.TransactionId,
-                TransactionDate = history.TransactionDate,
-                PaymentMethod = history.PaymentMethod,
-                TotalAmount = history.TotalAmount
-            };
-        }
+            Message = $"Ditemukan {result.Count} riwayat transaksi.",
+            Data = result.Select(MapToResponse).ToList()
+        });
+    }
+
+    private static TransactionHistoryResponse MapToResponse(TransactionHistory history)
+    {
+        return new TransactionHistoryResponse
+        {
+            Id = history.Id,
+            TransactionId = history.TransactionId,
+            TransactionDate = history.TransactionDate,
+            PaymentMethod = history.PaymentMethod,
+            TotalAmount = history.TotalAmount
+        };
     }
 }
