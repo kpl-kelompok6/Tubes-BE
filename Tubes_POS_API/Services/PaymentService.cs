@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Tubes_POS_API.Data;
 using Tubes_POS_API.Entities;
 using Tubes_POS_API.Entities.Enums;
+using Tubes_POS_API.Helpers;
 using Tubes_POS_API.Models.DTOs;
 
 namespace Tubes_POS_API.Services;
@@ -57,6 +58,7 @@ public sealed class PaymentService : IPaymentService
 
         var payment = new Payment
         {
+            Code = CodeHelper.GenerateCode("PAY"),
             TransactionId = transaction.Id,
             AmountPaid = request.PaidAmount,
             ChangeAmount = change,
@@ -73,6 +75,7 @@ public sealed class PaymentService : IPaymentService
 
         _db.TransactionHistories.Add(new TransactionHistory
         {
+            Code = CodeHelper.GenerateCode("HIST"),
             TransactionId = transaction.Id,
             TransactionDate = DateTime.UtcNow,
             PaymentMethod = paymentMethod,
@@ -85,6 +88,7 @@ public sealed class PaymentService : IPaymentService
         return new PaymentResponse
         {
             PaymentId = payment.Id,
+            Code = payment.Code,
             TransactionId = transaction.Id,
             TransactionCode = transaction.TransactionCode,
             TotalAmount = totalAmount,

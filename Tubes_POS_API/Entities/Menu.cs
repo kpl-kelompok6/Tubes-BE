@@ -6,6 +6,10 @@ public sealed class Menu
     public int Id { get; set; }
 
     [System.ComponentModel.DataAnnotations.Required]
+    [System.ComponentModel.DataAnnotations.MaxLength(30)]
+    public string Code { get; set; } = string.Empty;
+
+    [System.ComponentModel.DataAnnotations.Required]
     [System.ComponentModel.DataAnnotations.MaxLength(100)]
     public string Name { get; set; } = string.Empty;
 

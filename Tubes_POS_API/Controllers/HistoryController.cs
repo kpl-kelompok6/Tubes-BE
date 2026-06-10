@@ -86,6 +86,7 @@ namespace Tubes_POS_API.Controllers
             return new TransactionHistoryResponse
             {
                 Id = history.Id,
+                Code = history.Code,
                 TransactionId = history.TransactionId,
                 TransactionDate = history.TransactionDate,
                 PaymentMethod = history.PaymentMethod,

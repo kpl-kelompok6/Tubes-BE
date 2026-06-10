@@ -11,6 +11,10 @@ public sealed class Payment
     public int Id { get; set; }
 
     [Required]
+    [MaxLength(30)]
+    public string Code { get; set; } = string.Empty;
+
+    [Required]
     public int TransactionId { get; set; }
 
     [Precision(18, 2)]
