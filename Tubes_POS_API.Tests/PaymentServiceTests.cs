@@ -84,9 +84,9 @@ public class PaymentServiceTests : IDisposable
         Assert.Equal("cash", history.PaymentMethod);
     }
 
-    // Tests that insufficient payment is rejected.
+    // Tests that insufficient payment is rejected and transaction is persisted as Cancelled.
     [Fact]
-    public async Task ProcessPayment_WithInsufficientCash_ShouldThrow()
+    public async Task ProcessPayment_WithInsufficientCash_ShouldPersistCancelled()
     {
         var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.ProcessPaymentAsync(new PaymentRequest
         {
@@ -96,6 +96,9 @@ public class PaymentServiceTests : IDisposable
         }));
 
         Assert.Contains("Uang tidak cukup", ex.Message);
+
+        var transaction = await _db.Transactions.FirstAsync(t => t.Id == 1);
+        Assert.Equal(Entities.Enums.TransactionStatus.Cancelled, transaction.Status);
     }
 
     public void Dispose()
