@@ -2,11 +2,11 @@ namespace Tubes_POS_API.Models;
 
 public sealed class HealthCheckResponse
 {
-    public string Status { get; init; } = "ok";
+    public string Status { get; set; } = "ok";
 
-    public string Probe { get; init; } = "health";
+    public string Probe { get; set; } = "health";
 
-    public DateTimeOffset Timestamp { get; init; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset Timestamp { get; set; } = DateTimeOffset.UtcNow;
 
-    public Dictionary<string, string> Checks { get; init; } = [];
+    public Dictionary<string, string> Checks { get; set; } = [];
 }

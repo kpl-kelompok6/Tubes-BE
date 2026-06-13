@@ -39,6 +39,7 @@ public class PaymentServiceTests : IDisposable
             Id = 1,
             TransactionCode = "TRX-TEST",
             CustomerName = "Budi",
+            TotalAmount = 50_000m,
             Status = Entities.Enums.TransactionStatus.Created,
             CreatedAt = DateTime.UtcNow,
             Items =

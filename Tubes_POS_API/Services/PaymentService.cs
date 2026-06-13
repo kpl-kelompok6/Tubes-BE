@@ -42,8 +42,7 @@ public sealed class PaymentService : IPaymentService
             throw new InvalidOperationException("Transaksi belum memiliki item.");
         }
 
-        var totalAmount = transaction.Items.Sum(item => item.Quantity * item.UnitPrice);
-        transaction.TotalAmount = totalAmount;
+        var totalAmount = transaction.TotalAmount;
 
         if (request.PaidAmount < totalAmount)
         {

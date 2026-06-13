@@ -106,6 +106,28 @@ public class MenuServiceTests : IDisposable
         Assert.Null(_service.GetById(99));
     }
 
+    [Fact]
+    public void Update_WhenMenuNotFound_ShouldThrow()
+    {
+        var menu = new Menu
+        {
+            Id = 999,
+            Name = "Tidak Ada",
+            Price = 10_000m,
+            Category = "Lainnya"
+        };
+
+        var ex = Assert.Throws<Exception>(() => _service.Update(menu));
+        Assert.Contains("not found", ex.Message);
+    }
+
+    [Fact]
+    public void Delete_WhenMenuNotFound_ShouldThrow()
+    {
+        var ex = Assert.Throws<Exception>(() => _service.Delete(999));
+        Assert.Contains("not found", ex.Message);
+    }
+
     public void Dispose()
     {
         _db.Dispose();
