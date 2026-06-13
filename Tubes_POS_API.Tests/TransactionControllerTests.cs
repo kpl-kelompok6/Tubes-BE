@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Tubes_POS_API.Controllers;
@@ -22,7 +23,7 @@ public class TransactionControllerTests : IDisposable
             .Options;
 
         _db = new AppDbContext(options);
-        var service = new TransactionService(_db);
+        var service = new TransactionService(_db, new NullHttpContextAccessor());
         _controller = new TransactionController(service);
     }
 

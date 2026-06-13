@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Tubes_POS_API.Entities;
 using Tubes_POS_API.Models;
 using Tubes_POS_API.Models.DTOs;
@@ -6,6 +7,7 @@ using Tubes_POS_API.Services;
 
 namespace Tubes_POS_API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/histories")]
     public class HistoryController : ControllerBase
@@ -103,7 +105,8 @@ namespace Tubes_POS_API.Controllers
                 TransactionId = history.TransactionId,
                 TransactionDate = history.TransactionDate,
                 PaymentMethod = history.PaymentMethod,
-                TotalAmount = history.TotalAmount
+                TotalAmount = history.TotalAmount,
+                CashierName = history.CashierName
             };
         }
     }

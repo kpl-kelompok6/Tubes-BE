@@ -11,6 +11,7 @@ public sealed class TransactionResponse
     public decimal Change { get; set; }
     public string PaymentMethod { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
+    public string? CashierName { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public List<TransactionItemResponse> Items { get; set; } = [];

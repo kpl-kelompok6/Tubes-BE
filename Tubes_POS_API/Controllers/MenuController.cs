@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Tubes_POS_API.Entities;
 using Tubes_POS_API.Models;
@@ -6,6 +7,7 @@ using Tubes_POS_API.Services;
 
 namespace Tubes_POS_API.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/menus")]
 public class MenuController : ControllerBase

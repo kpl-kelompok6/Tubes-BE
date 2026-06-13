@@ -14,8 +14,10 @@ namespace Tubes_POS_API.Entities
 
         public DateTime TransactionDate { get; set; }
 
-        public string PaymentMethod { get; set; } = "";
+    public string? CashierName { get; set; }
 
-        public decimal TotalAmount { get; set; }
+    public string PaymentMethod { get; set; } = "";
+
+    public decimal TotalAmount { get; set; }
     }
 }

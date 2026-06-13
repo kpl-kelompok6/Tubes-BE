@@ -23,6 +23,7 @@ public sealed class PaymentService : IPaymentService
         var transaction = await _db.Transactions
             .Include(t => t.Items)
             .Include(t => t.Payment)
+            .Include(t => t.Cashier)
             .FirstOrDefaultAsync(t => t.Id == request.TransactionId)
             ?? throw new KeyNotFoundException($"Transaksi dengan ID {request.TransactionId} tidak ditemukan.");
 
@@ -82,7 +83,8 @@ public sealed class PaymentService : IPaymentService
             TransactionId = transaction.Id,
             TransactionDate = DateTime.UtcNow,
             PaymentMethod = paymentMethod,
-            TotalAmount = totalAmount
+            TotalAmount = totalAmount,
+            CashierName = transaction.Cashier?.DisplayName
         });
 
         _db.Payments.Add(payment);

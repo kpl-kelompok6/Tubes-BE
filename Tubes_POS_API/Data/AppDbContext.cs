@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Tubes_POS_API.Entities;
+using Tubes_POS_API.Entities.Enums;
 
 namespace Tubes_POS_API.Data;
 
@@ -12,6 +13,7 @@ public sealed class AppDbContext : DbContext
     public DbSet<TransactionItem> TransactionItems => Set<TransactionItem>();
     public DbSet<Payment> Payments => Set<Payment>();
     public DbSet<TransactionHistory> TransactionHistories => Set<TransactionHistory>();
+    public DbSet<Employee> Employees => Set<Employee>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -30,11 +32,21 @@ public sealed class AppDbContext : DbContext
             );
         });
 
+        modelBuilder.Entity<Employee>(entity =>
+        {
+            entity.HasIndex(e => e.Username).IsUnique();
+        });
+
         modelBuilder.Entity<Transaction>(entity =>
         {
             entity.HasIndex(t => t.TransactionCode).IsUnique();
             entity.HasIndex(t => t.Status);
             entity.HasIndex(t => t.CreatedAt);
+
+            entity.HasOne(t => t.Cashier)
+                  .WithMany(e => e.Transactions)
+                  .HasForeignKey(t => t.CashierId)
+                  .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<TransactionItem>(entity =>
@@ -64,5 +76,17 @@ public sealed class AppDbContext : DbContext
             entity.HasIndex(h => h.Code).IsUnique();
             entity.HasIndex(h => h.TransactionDate);
         });
+
+        modelBuilder.Entity<Employee>().HasData(
+            new Employee
+            {
+                Id = 1,
+                Username = "admin",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
+                DisplayName = "Admin Utama",
+                Role = EmployeeRole.Admin,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            }
+        );
     }
 }

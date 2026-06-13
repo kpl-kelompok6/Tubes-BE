@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Tubes_POS_API.Data;
 using Tubes_POS_API.Entities;
@@ -36,7 +37,7 @@ public class PerformanceTests : IDisposable
                 .UseInMemoryDatabase(_dbName)
                 .Options;
             using var db = new AppDbContext(opts);
-            var service = new TransactionService(db);
+            var service = new TransactionService(db, new NullHttpContextAccessor());
             var tx = await service.CreateTransactionAsync(new CreateTransactionRequest
             {
                 CustomerName = $"Concurrent {i}"
