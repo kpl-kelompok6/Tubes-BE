@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Tubes_POS_API.Entities;
 using Tubes_POS_API.Models;
@@ -6,6 +7,7 @@ using Tubes_POS_API.Services;
 
 namespace Tubes_POS_API.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/menus")]
 public class MenuController : ControllerBase
@@ -66,11 +68,13 @@ public class MenuController : ControllerBase
 
         _menuService.Add(menu);
 
-        return Ok(new ApiResponse<MenuResponse>
+        var response = new ApiResponse<MenuResponse>
         {
             Message = "Menu berhasil ditambahkan.",
             Data = MapToResponse(menu)
-        });
+        };
+
+        return CreatedAtAction(nameof(GetById), new { id = menu.Id }, response);
     }
 
     [HttpPut("{id}")]

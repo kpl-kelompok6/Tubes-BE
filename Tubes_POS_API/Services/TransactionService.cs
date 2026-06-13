@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using Tubes_POS_API.Data;
 using Tubes_POS_API.Entities;
@@ -9,6 +10,7 @@ namespace Tubes_POS_API.Services;
 public sealed class TransactionService : ITransactionService
 {
     private readonly AppDbContext _db;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     private static readonly Dictionary<TransactionStatus, HashSet<string>> AllowedOperations = new()
     {
@@ -40,18 +42,22 @@ public sealed class TransactionService : ITransactionService
         ["online"] = "ONL"
     };
 
-    public TransactionService(AppDbContext db)
+    public TransactionService(AppDbContext db, IHttpContextAccessor httpContextAccessor)
     {
         _db = db;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<TransactionResponse> CreateTransactionAsync(CreateTransactionRequest request)
     {
+        var cashierId = GetCurrentEmployeeId();
+
         var transaction = new Transaction
         {
             TransactionCode = GenerateTransactionCode(),
             CustomerName = request.CustomerName,
             TableNumber = request.TableNumber,
+            CashierId = cashierId,
             TotalAmount = 0m,
             PaidAmount = 0m,
             Change = 0m,
@@ -78,6 +84,7 @@ public sealed class TransactionService : ITransactionService
         var transactions = await _db.Transactions
             .Include(t => t.Items)
                 .ThenInclude(ti => ti.Menu)
+            .Include(t => t.Cashier)
             .OrderByDescending(t => t.CreatedAt)
             .ToListAsync();
 
@@ -181,6 +188,14 @@ public sealed class TransactionService : ITransactionService
         return menu.Price + (menu.Price * taxRate);
     }
 
+    private int? GetCurrentEmployeeId()
+    {
+        var employeeIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirstValue("employeeId");
+        if (employeeIdClaim is not null && int.TryParse(employeeIdClaim, out var employeeId))
+            return employeeId;
+        return null;
+    }
+
     private static string GenerateTransactionCode()
     {
         var prefix = CodePrefixTable.GetValueOrDefault("default", "TRX");
@@ -193,6 +208,7 @@ public sealed class TransactionService : ITransactionService
         return await _db.Transactions
             .Include(t => t.Items)
                 .ThenInclude(ti => ti.Menu)
+            .Include(t => t.Cashier)
             .FirstOrDefaultAsync(t => t.Id == id)
             ?? throw new KeyNotFoundException($"Transaksi dengan ID {id} tidak ditemukan.");
     }
@@ -212,6 +228,7 @@ public sealed class TransactionService : ITransactionService
             Status = transaction.Status.ToString(),
             CreatedAt = transaction.CreatedAt,
             UpdatedAt = transaction.UpdatedAt,
+            CashierName = transaction.Cashier?.DisplayName,
             Items = transaction.Items.Select(i => new TransactionItemResponse
             {
                 Id = i.Id,

@@ -10,6 +10,8 @@ public sealed class TransactionHistoryResponse
 
     public DateTime TransactionDate { get; set; }
 
+    public string? CashierName { get; set; }
+
     public string PaymentMethod { get; set; } = string.Empty;
 
     public decimal TotalAmount { get; set; }

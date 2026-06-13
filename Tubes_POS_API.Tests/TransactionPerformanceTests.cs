@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Tubes_POS_API.Data;
 using Tubes_POS_API.Entities;
@@ -19,7 +20,7 @@ public class TransactionPerformanceTests : IDisposable
             .Options;
 
         _db = new AppDbContext(options);
-        _service = new TransactionService(_db);
+        _service = new TransactionService(_db, new NullHttpContextAccessor());
 
         SeedMenuData();
     }

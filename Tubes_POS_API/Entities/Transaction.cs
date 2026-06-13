@@ -38,6 +38,10 @@ public sealed class Transaction
 
     public DateTime? UpdatedAt { get; set; }
 
+    public int? CashierId { get; set; }
+
+    public Employee? Cashier { get; set; }
+
     [InverseProperty(nameof(TransactionItem.Transaction))]
     public List<TransactionItem> Items { get; set; } = [];
 

@@ -23,6 +23,7 @@ public sealed class PaymentService : IPaymentService
         var transaction = await _db.Transactions
             .Include(t => t.Items)
             .Include(t => t.Payment)
+            .Include(t => t.Cashier)
             .FirstOrDefaultAsync(t => t.Id == request.TransactionId)
             ?? throw new KeyNotFoundException($"Transaksi dengan ID {request.TransactionId} tidak ditemukan.");
 
@@ -41,12 +42,14 @@ public sealed class PaymentService : IPaymentService
             throw new InvalidOperationException("Transaksi belum memiliki item.");
         }
 
-        var totalAmount = transaction.Items.Sum(item => item.Quantity * item.UnitPrice);
-        transaction.TotalAmount = totalAmount;
+        var totalAmount = transaction.TotalAmount;
 
         if (request.PaidAmount < totalAmount)
         {
             _stateMachine.Fail();
+            transaction.Status = TransactionStatus.Cancelled;
+            transaction.UpdatedAt = DateTime.UtcNow;
+            await _db.SaveChangesAsync();
             throw new ArgumentException("Uang tidak cukup.");
         }
 
@@ -79,7 +82,8 @@ public sealed class PaymentService : IPaymentService
             TransactionId = transaction.Id,
             TransactionDate = DateTime.UtcNow,
             PaymentMethod = paymentMethod,
-            TotalAmount = totalAmount
+            TotalAmount = totalAmount,
+            CashierName = transaction.Cashier?.DisplayName
         });
 
         _db.Payments.Add(payment);
