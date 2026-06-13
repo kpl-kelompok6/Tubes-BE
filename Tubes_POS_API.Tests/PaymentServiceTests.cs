@@ -101,6 +101,84 @@ public class PaymentServiceTests : IDisposable
         Assert.Equal(Entities.Enums.TransactionStatus.Cancelled, transaction.Status);
     }
 
+    [Fact]
+    public async Task ProcessPayment_WithExactAmount_ShouldReturnNoChange()
+    {
+        _db.Transactions.Add(new Transaction
+        {
+            Id = 2,
+            TransactionCode = "TRX-TEST2",
+            TotalAmount = 50_000m,
+            Status = Entities.Enums.TransactionStatus.Created,
+            CreatedAt = DateTime.UtcNow,
+            Items =
+            [
+                new TransactionItem
+                {
+                    Id = 2,
+                    TransactionId = 2,
+                    MenuId = 1,
+                    Quantity = 2,
+                    UnitPrice = 25_000m
+                }
+            ]
+        });
+        _db.SaveChanges();
+
+        var result = await _service.ProcessPaymentAsync(new PaymentRequest
+        {
+            TransactionId = 2,
+            PaidAmount = 50_000m,
+            PaymentMethod = "cash"
+        });
+
+        Assert.Equal(0m, result.ChangeAmount);
+        Assert.Equal(50_000m, result.PaidAmount);
+        Assert.Equal("Completed", result.Status);
+    }
+
+    [Fact]
+    public async Task ProcessPayment_WhenAlreadyPaid_ShouldThrow()
+    {
+        _db.Transactions.Add(new Transaction
+        {
+            Id = 2,
+            TransactionCode = "TRX-TEST2",
+            TotalAmount = 50_000m,
+            Status = Entities.Enums.TransactionStatus.Completed,
+            CreatedAt = DateTime.UtcNow,
+            Payment = new Payment
+            {
+                TransactionId = 2,
+                AmountPaid = 50_000m,
+                ChangeAmount = 0m,
+                PaymentMethod = "cash",
+                Status = Entities.Enums.PaymentStatus.Completed
+            },
+            Items =
+            [
+                new TransactionItem
+                {
+                    Id = 2,
+                    TransactionId = 2,
+                    MenuId = 1,
+                    Quantity = 2,
+                    UnitPrice = 25_000m
+                }
+            ]
+        });
+        _db.SaveChanges();
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => _service.ProcessPaymentAsync(new PaymentRequest
+        {
+            TransactionId = 2,
+            PaidAmount = 50_000m,
+            PaymentMethod = "cash"
+        }));
+
+        Assert.Contains("sudah memiliki pembayaran", ex.Message);
+    }
+
     public void Dispose()
     {
         _db.Dispose();
