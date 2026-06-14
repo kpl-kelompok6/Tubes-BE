@@ -30,6 +30,6 @@ public sealed class NotFoundResponseMiddleware
         };
 
         context.Response.ContentType = "application/json";
-        await context.Response.WriteAsync(JsonSerializer.Serialize(payload));
+        await context.Response.WriteAsync(JsonSerializer.Serialize(payload, ApiErrorResponse.JsonOptions));
     }
 }

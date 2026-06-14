@@ -27,7 +27,7 @@ public class MiddlewareTests
 
         context.Response.Body.Position = 0;
         var json = await new StreamReader(context.Response.Body).ReadToEndAsync();
-        var response = JsonSerializer.Deserialize<ApiErrorResponse>(json)!;
+        var response = JsonSerializer.Deserialize<ApiErrorResponse>(json, ApiErrorResponse.JsonOptions)!;
 
         Assert.Equal(StatusCodes.Status409Conflict, context.Response.StatusCode);
         Assert.Equal("payment conflict", response.Message);
@@ -52,7 +52,7 @@ public class MiddlewareTests
 
         context.Response.Body.Position = 0;
         var json = await new StreamReader(context.Response.Body).ReadToEndAsync();
-        var response = JsonSerializer.Deserialize<ApiErrorResponse>(json)!;
+        var response = JsonSerializer.Deserialize<ApiErrorResponse>(json, ApiErrorResponse.JsonOptions)!;
 
         Assert.Equal(StatusCodes.Status404NotFound, context.Response.StatusCode);
         Assert.Equal("Endpoint tidak ditemukan.", response.Message);
