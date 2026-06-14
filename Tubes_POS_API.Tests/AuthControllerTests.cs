@@ -102,7 +102,7 @@ public class AuthControllerTests : IDisposable
     }
 
     [Fact]
-    public async Task Login_WithWrongPassword_ShouldThrow()
+    public async Task Login_WithWrongPassword_ShouldReturn401()
     {
         await _controller.Register(new RegisterRequest
         {
@@ -111,12 +111,16 @@ public class AuthControllerTests : IDisposable
             DisplayName = "Kasir Satu"
         });
 
-        await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
-            _controller.Login(new LoginRequest
-            {
-                Username = "kasir1",
-                Password = "wrongpassword"
-            }));
+        var result = await _controller.Login(new LoginRequest
+        {
+            Username = "kasir1",
+            Password = "wrongpassword"
+        });
+
+        var unauthorized = Assert.IsType<UnauthorizedObjectResult>(result.Result);
+        var response = Assert.IsType<ApiResponse<AuthResponse>>(unauthorized.Value);
+        Assert.False(response.Success);
+        Assert.Contains("salah", response.Message);
     }
 
     public void Dispose()

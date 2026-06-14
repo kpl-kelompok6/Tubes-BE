@@ -30,11 +30,23 @@ public sealed class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<ActionResult<ApiResponse<AuthResponse>>> Login([FromBody] LoginRequest request)
     {
-        var response = await _authService.LoginAsync(request);
-        return Ok(new ApiResponse<AuthResponse>
+        try
         {
-            Message = "Login berhasil.",
-            Data = response
-        });
+            var response = await _authService.LoginAsync(request);
+            return Ok(new ApiResponse<AuthResponse>
+            {
+                Message = "Login berhasil.",
+                Data = response
+            });
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Unauthorized(new ApiResponse<AuthResponse>
+            {
+                Success = false,
+                Message = "Username atau password salah.",
+                Data = null
+            });
+        }
     }
 }
