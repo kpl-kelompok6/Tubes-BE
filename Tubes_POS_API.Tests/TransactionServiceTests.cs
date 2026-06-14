@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Tubes_POS_API.Data;
 using Tubes_POS_API.Entities;
@@ -18,7 +19,7 @@ public class TransactionServiceTests : IDisposable
             .Options;
 
         _db = new AppDbContext(options);
-        _service = new TransactionService(_db);
+        _service = new TransactionService(_db, new NullHttpContextAccessor());
 
         SeedMenuData();
     }
@@ -34,6 +35,7 @@ public class TransactionServiceTests : IDisposable
         _db.SaveChanges();
     }
 
+    // Tests that creating a transaction starts as an empty draft/cart.
     [Fact]
     public async Task CreateTransaction_EmptyRequest_ShouldCreateDraftTransaction()
     {
@@ -51,6 +53,7 @@ public class TransactionServiceTests : IDisposable
         Assert.StartsWith("TRX-", result.TransactionCode);
     }
 
+    // Tests that cart items increase total amount correctly.
     [Fact]
     public async Task AddItem_ShouldCalculateTotalCorrectly()
     {
@@ -63,6 +66,7 @@ public class TransactionServiceTests : IDisposable
         Assert.Equal(2, result.Items.Count);
     }
 
+    // Tests that adding the same menu twice merges quantity.
     [Fact]
     public async Task AddItem_SameMenu_ShouldMergeQuantity()
     {
@@ -76,6 +80,7 @@ public class TransactionServiceTests : IDisposable
         Assert.Equal(138_750m, result.TotalAmount);
     }
 
+    // Tests that removing an item recalculates the total.
     [Fact]
     public async Task RemoveItem_ShouldRecalculateTotal()
     {
@@ -91,6 +96,7 @@ public class TransactionServiceTests : IDisposable
         Assert.Single(result.Items);
     }
 
+    // Tests that updating quantity recalculates the total.
     [Fact]
     public async Task UpdateItemQuantity_ShouldRecalculateTotal()
     {
@@ -103,6 +109,7 @@ public class TransactionServiceTests : IDisposable
         Assert.Equal(138_750m, result.TotalAmount);
     }
 
+    // Tests that unavailable menu items are rejected.
     [Fact]
     public async Task AddItem_MenuUnavailable_ShouldThrowArgumentException()
     {
@@ -112,6 +119,71 @@ public class TransactionServiceTests : IDisposable
             _service.AddItemAsync(tx.Id, new AddItemRequest { MenuId = 4, Quantity = 1 }));
 
         Assert.Contains("tidak tersedia", ex.Message);
+    }
+
+    [Fact]
+    public async Task AddItem_WhenCompleted_ShouldThrow()
+    {
+        var tx = await _service.CreateTransactionAsync(new CreateTransactionRequest());
+        var dbTx = await _db.Transactions.FindAsync(tx.Id);
+        dbTx!.Status = Entities.Enums.TransactionStatus.Completed;
+        await _db.SaveChangesAsync();
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            _service.AddItemAsync(tx.Id, new AddItemRequest { MenuId = 1, Quantity = 1 }));
+
+        Assert.Contains("sudah selesai", ex.Message);
+    }
+
+    [Fact]
+    public async Task AddItem_WhenCancelled_ShouldThrow()
+    {
+        var tx = await _service.CreateTransactionAsync(new CreateTransactionRequest());
+        var dbTx = await _db.Transactions.FindAsync(tx.Id);
+        dbTx!.Status = Entities.Enums.TransactionStatus.Cancelled;
+        await _db.SaveChangesAsync();
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            _service.AddItemAsync(tx.Id, new AddItemRequest { MenuId = 1, Quantity = 1 }));
+
+        Assert.Contains("sudah dibatalkan", ex.Message);
+    }
+
+    [Fact]
+    public async Task UpdateItemQuantity_WhenCompleted_ShouldThrow()
+    {
+        var tx = await _service.CreateTransactionAsync(new CreateTransactionRequest());
+        var afterAdd = await _service.AddItemAsync(tx.Id, new AddItemRequest { MenuId = 1, Quantity = 2 });
+        var itemId = afterAdd.Items.First().Id;
+
+        var dbTx = await _db.Transactions.FindAsync(tx.Id);
+        dbTx!.Status = Entities.Enums.TransactionStatus.Completed;
+        await _db.SaveChangesAsync();
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            _service.UpdateItemQuantityAsync(tx.Id, itemId, new UpdateItemRequest { Quantity = 5 }));
+
+        Assert.Contains("sudah selesai", ex.Message);
+    }
+
+    [Fact]
+    public async Task RemoveItem_WhenItemNotFound_ShouldThrow()
+    {
+        var tx = await _service.CreateTransactionAsync(new CreateTransactionRequest());
+
+        var ex = await Assert.ThrowsAsync<KeyNotFoundException>(() =>
+            _service.RemoveItemAsync(tx.Id, 999));
+
+        Assert.Contains("tidak ditemukan", ex.Message);
+    }
+
+    [Fact]
+    public async Task CreateTransaction_WithEmptyCustomerName_ShouldSucceed()
+    {
+        var result = await _service.CreateTransactionAsync(new CreateTransactionRequest());
+
+        Assert.Null(result.CustomerName);
+        Assert.Equal("Created", result.Status);
     }
 
     public void Dispose()

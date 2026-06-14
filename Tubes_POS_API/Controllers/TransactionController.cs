@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Tubes_POS_API.Models;
 using Tubes_POS_API.Models.DTOs;
@@ -5,6 +6,7 @@ using Tubes_POS_API.Services;
 
 namespace Tubes_POS_API.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/transactions")]
 public sealed class TransactionController : ControllerBase

@@ -23,6 +23,7 @@ public class MenuServiceTests : IDisposable
         _service = new MenuService(new MenuRepository(_db));
     }
 
+    // Tests that seeded menus are returned from persistence.
     [Fact]
     public void GetAll_ShouldReturnSeededMenus()
     {
@@ -33,6 +34,7 @@ public class MenuServiceTests : IDisposable
         Assert.Contains(result, menu => menu.Name == "Es Teh Manis");
     }
 
+    // Tests that a valid menu can be added.
     [Fact]
     public void Add_ShouldAppendNewMenu()
     {
@@ -51,6 +53,7 @@ public class MenuServiceTests : IDisposable
         Assert.Contains(result, item => item.Name == "Kopi Susu");
     }
 
+    // Tests that invalid menu input is rejected.
     [Fact]
     public void Add_InvalidMenu_ShouldThrow()
     {
@@ -66,6 +69,7 @@ public class MenuServiceTests : IDisposable
         Assert.Contains("Menu name cannot be empty", ex.Message);
     }
 
+    // Tests that an existing menu can be updated.
     [Fact]
     public void Update_ShouldModifyExistingMenu()
     {
@@ -82,6 +86,7 @@ public class MenuServiceTests : IDisposable
         Assert.Equal(27_500m, updated.Price);
     }
 
+    // Tests that a menu can be deleted.
     [Fact]
     public void Delete_ShouldRemoveMenu()
     {
@@ -99,6 +104,28 @@ public class MenuServiceTests : IDisposable
         _service.Delete(99);
 
         Assert.Null(_service.GetById(99));
+    }
+
+    [Fact]
+    public void Update_WhenMenuNotFound_ShouldThrow()
+    {
+        var menu = new Menu
+        {
+            Id = 999,
+            Name = "Tidak Ada",
+            Price = 10_000m,
+            Category = "Lainnya"
+        };
+
+        var ex = Assert.Throws<Exception>(() => _service.Update(menu));
+        Assert.Contains("not found", ex.Message);
+    }
+
+    [Fact]
+    public void Delete_WhenMenuNotFound_ShouldThrow()
+    {
+        var ex = Assert.Throws<Exception>(() => _service.Delete(999));
+        Assert.Contains("not found", ex.Message);
     }
 
     public void Dispose()

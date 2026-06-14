@@ -1,4 +1,5 @@
 using Tubes_POS_API.Entities;
+using Tubes_POS_API.Helpers;
 using Tubes_POS_API.Repositories;
 
 namespace Tubes_POS_API.Services;
@@ -34,6 +35,7 @@ public class MenuService : IMenuService
         if (string.IsNullOrWhiteSpace(menu.Category))
             throw new Exception("Category cannot be empty");
 
+        menu.Code = CodeHelper.GenerateCode("MENU");
         _menuRepository.Add(menu);
     }
 

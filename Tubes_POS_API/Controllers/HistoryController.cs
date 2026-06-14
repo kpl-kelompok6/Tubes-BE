@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Tubes_POS_API.Entities;
 using Tubes_POS_API.Models;
 using Tubes_POS_API.Models.DTOs;
@@ -6,6 +7,7 @@ using Tubes_POS_API.Services;
 
 namespace Tubes_POS_API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/histories")]
     public class HistoryController : ControllerBase
@@ -81,15 +83,30 @@ namespace Tubes_POS_API.Controllers
             });
         }
 
+        // GET api/history/by-payment/{method}
+        [HttpGet("by-payment/{method}")]
+        public async Task<ActionResult<ApiResponse<List<TransactionHistoryResponse>>>> GetByPaymentMethod(string method)
+        {
+            var result = await _historyService.GetByPaymentMethodAsync(method);
+
+            return Ok(new ApiResponse<List<TransactionHistoryResponse>>
+            {
+                Message = $"Ditemukan {result.Count} riwayat transaksi.",
+                Data = result.Select(MapToResponse).ToList()
+            });
+        }
+
         private static TransactionHistoryResponse MapToResponse(TransactionHistory history)
         {
             return new TransactionHistoryResponse
             {
                 Id = history.Id,
+                Code = history.Code,
                 TransactionId = history.TransactionId,
                 TransactionDate = history.TransactionDate,
                 PaymentMethod = history.PaymentMethod,
-                TotalAmount = history.TotalAmount
+                TotalAmount = history.TotalAmount,
+                CashierName = history.CashierName
             };
         }
     }
