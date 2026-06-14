@@ -36,6 +36,7 @@ public sealed class ExceptionHandlingMiddleware
     {
         var (statusCode, message) = exception switch
         {
+            UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, exception.Message),
             KeyNotFoundException => (StatusCodes.Status404NotFound, "Resource not found."),
             ArgumentException => (StatusCodes.Status400BadRequest, "Invalid request."),
             InvalidOperationException => (StatusCodes.Status409Conflict, exception.Message),
