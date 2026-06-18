@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Tubes_POS_API.Models;
 using Tubes_POS_API.Models.DTOs.Auth;
 using Tubes_POS_API.Services;
@@ -19,12 +20,33 @@ public sealed class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<ActionResult<ApiResponse<AuthResponse>>> Register([FromBody] RegisterRequest request)
     {
-        var response = await _authService.RegisterAsync(request);
-        return CreatedAtAction(nameof(Register), new ApiResponse<AuthResponse>
+        try
         {
-            Message = "Registrasi berhasil.",
-            Data = response
-        });
+            var response = await _authService.RegisterAsync(request);
+            return CreatedAtAction(nameof(Register), new ApiResponse<AuthResponse>
+            {
+                Message = "Registrasi berhasil.",
+                Data = response
+            });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new ApiResponse<AuthResponse>
+            {
+                Success = false,
+                Message = ex.Message,
+                Data = null
+            });
+        }
+        catch (DbUpdateException)
+        {
+            return Conflict(new ApiResponse<AuthResponse>
+            {
+                Success = false,
+                Message = "Username sudah digunakan.",
+                Data = null
+            });
+        }
     }
 
     [HttpPost("login")]

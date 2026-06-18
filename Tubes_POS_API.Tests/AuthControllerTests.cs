@@ -59,7 +59,7 @@ public class AuthControllerTests : IDisposable
     }
 
     [Fact]
-    public async Task Register_DuplicateUsername_ShouldThrow()
+    public async Task Register_DuplicateUsername_ShouldReturn400()
     {
         await _controller.Register(new RegisterRequest
         {
@@ -68,13 +68,17 @@ public class AuthControllerTests : IDisposable
             DisplayName = "Kasir Satu"
         });
 
-        await Assert.ThrowsAsync<ArgumentException>(() =>
-            _controller.Register(new RegisterRequest
-            {
-                Username = "kasir1",
-                Password = "password456",
-                DisplayName = "Kasir Dua"
-            }));
+        var result = await _controller.Register(new RegisterRequest
+        {
+            Username = "kasir1",
+            Password = "password456",
+            DisplayName = "Kasir Dua"
+        });
+
+        var badRequest = Assert.IsType<BadRequestObjectResult>(result.Result);
+        var response = Assert.IsType<ApiResponse<AuthResponse>>(badRequest.Value);
+        Assert.False(response.Success);
+        Assert.Contains("sudah digunakan", response.Message);
     }
 
     [Fact]
