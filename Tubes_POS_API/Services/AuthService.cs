@@ -23,12 +23,14 @@ public sealed class AuthService : IAuthService
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
     {
-        if (await _db.Employees.AnyAsync(e => e.Username == request.Username))
+        var username = request.Username.Trim();
+
+        if (await _db.Employees.AnyAsync(e => e.Username == username))
             throw new ArgumentException("Username sudah digunakan.");
 
         var employee = new Employee
         {
-            Username = request.Username,
+            Username = username,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
             DisplayName = request.DisplayName,
             Role = request.Role,
