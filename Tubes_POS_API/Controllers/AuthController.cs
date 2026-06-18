@@ -19,12 +19,24 @@ public sealed class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<ActionResult<ApiResponse<AuthResponse>>> Register([FromBody] RegisterRequest request)
     {
-        var response = await _authService.RegisterAsync(request);
-        return CreatedAtAction(nameof(Register), new ApiResponse<AuthResponse>
+        try
         {
-            Message = "Registrasi berhasil.",
-            Data = response
-        });
+            var response = await _authService.RegisterAsync(request);
+            return CreatedAtAction(nameof(Register), new ApiResponse<AuthResponse>
+            {
+                Message = "Registrasi berhasil.",
+                Data = response
+            });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new ApiResponse<AuthResponse>
+            {
+                Success = false,
+                Message = ex.Message,
+                Data = null
+            });
+        }
     }
 
     [HttpPost("login")]
