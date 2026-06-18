@@ -167,6 +167,19 @@ public class AuthServiceTests : IDisposable
         Assert.Contains(jwt.Claims, c => c.Type == ClaimTypes.Name && c.Value == "kasir1");
     }
 
+    [Fact]
+    public async Task Register_WithWhitespaceUsername_ShouldTrim()
+    {
+        var result = await _service.RegisterAsync(new RegisterRequest
+        {
+            Username = "  admin1  ",
+            Password = "password123",
+            DisplayName = "Admin Satu"
+        });
+
+        Assert.Equal("admin1", result.Username);
+    }
+
     public void Dispose()
     {
         _db.Dispose();
