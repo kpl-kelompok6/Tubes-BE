@@ -10,4 +10,5 @@ public interface ITransactionService
     Task<TransactionResponse> AddItemAsync(int transactionId, AddItemRequest request);
     Task<TransactionResponse> RemoveItemAsync(int transactionId, int itemId);
     Task<TransactionResponse> UpdateItemQuantityAsync(int transactionId, int itemId, UpdateItemRequest request);
+    Task<TransactionResponse> CancelTransactionAsync(int id);
 }

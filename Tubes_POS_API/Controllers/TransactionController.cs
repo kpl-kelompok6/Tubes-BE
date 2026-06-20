@@ -89,4 +89,16 @@ public sealed class TransactionController : ControllerBase
             Data = result,
         });
     }
+
+    [HttpDelete("{id:int}")]
+    public async Task<ActionResult<ApiResponse<TransactionResponse>>> Cancel(int id)
+    {
+        var result = await _transactionService.CancelTransactionAsync(id);
+
+        return Ok(new ApiResponse<TransactionResponse>
+        {
+            Message = "Transaksi berhasil dibatalkan.",
+            Data = result,
+        });
+    }
 }

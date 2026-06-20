@@ -168,6 +168,21 @@ public sealed class TransactionService : ITransactionService
         return await GetTransactionByIdAsync(transactionId);
     }
 
+    public async Task<TransactionResponse> CancelTransactionAsync(int id)
+    {
+        var transaction = await FindTransactionWithItemsAsync(id);
+
+        if (transaction.Status != TransactionStatus.Created)
+            throw new InvalidOperationException("Hanya transaksi dengan status 'Created' yang bisa dibatalkan.");
+
+        transaction.Status = TransactionStatus.Cancelled;
+        transaction.UpdatedAt = DateTime.UtcNow;
+
+        await _db.SaveChangesAsync();
+
+        return MapToResponse(transaction);
+    }
+
     private static void ValidateOperation(TransactionStatus status, string operation)
     {
         if (!AllowedOperations.TryGetValue(status, out var allowed) || !allowed.Contains(operation))

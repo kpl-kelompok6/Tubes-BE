@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Tubes_POS_API.Models;
 using Tubes_POS_API.Models.DTOs.Auth;
 using Tubes_POS_API.Services;
@@ -34,6 +35,15 @@ public sealed class AuthController : ControllerBase
             {
                 Success = false,
                 Message = ex.Message,
+                Data = null
+            });
+        }
+        catch (DbUpdateException)
+        {
+            return Conflict(new ApiResponse<AuthResponse>
+            {
+                Success = false,
+                Message = "Username sudah digunakan.",
                 Data = null
             });
         }
