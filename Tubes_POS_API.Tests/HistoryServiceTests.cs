@@ -46,6 +46,30 @@ public class HistoryServiceTests : IDisposable
         Assert.Null(result);
     }
 
+    [Fact]
+    public async Task GetFilteredAsync_WithDateRange_ShouldFilter()
+    {
+        var results = await _service.GetFilteredAsync(DateTime.UtcNow.AddDays(-1).AddMinutes(-1), DateTime.UtcNow, null, 1, 20);
+
+        Assert.Equal(2, results.Count);
+    }
+
+    [Fact]
+    public async Task GetFilteredAsync_WithPaymentMethod_ShouldFilter()
+    {
+        var results = await _service.GetFilteredAsync(null, null, "qris", 1, 20);
+
+        Assert.Single(results);
+    }
+
+    [Fact]
+    public async Task GetFilteredAsync_WithPagination_ShouldRespectLimit()
+    {
+        var results = await _service.GetFilteredAsync(null, null, null, 1, 2);
+
+        Assert.Equal(2, results.Count);
+    }
+
     public void Dispose()
     {
         _db.Dispose();

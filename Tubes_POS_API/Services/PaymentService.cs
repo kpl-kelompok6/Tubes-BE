@@ -103,4 +103,63 @@ public sealed class PaymentService : IPaymentService
             CreatedAt = payment.CreatedAt
         };
     }
+
+    public async Task<List<PaymentResponse>> GetAllPaymentsAsync(DateTime? startDate, DateTime? endDate, string? paymentMethod, int page, int limit)
+    {
+        var query = _db.Payments
+            .Include(p => p.Transaction)
+            .AsQueryable();
+
+        if (startDate.HasValue)
+            query = query.Where(p => p.CreatedAt >= startDate.Value);
+
+        if (endDate.HasValue)
+            query = query.Where(p => p.CreatedAt <= endDate.Value);
+
+        if (!string.IsNullOrWhiteSpace(paymentMethod))
+            query = query.Where(p => p.PaymentMethod.ToLower() == paymentMethod.ToLower());
+
+        var payments = await query
+            .OrderByDescending(p => p.CreatedAt)
+            .Skip((page - 1) * limit)
+            .Take(limit)
+            .ToListAsync();
+
+        return payments.Select(p => new PaymentResponse
+        {
+            PaymentId = p.Id,
+            Code = p.Code,
+            TransactionId = p.TransactionId,
+            TransactionCode = p.Transaction?.TransactionCode ?? string.Empty,
+            TotalAmount = p.Transaction?.TotalAmount ?? 0m,
+            PaidAmount = p.AmountPaid,
+            ChangeAmount = p.ChangeAmount,
+            PaymentMethod = p.PaymentMethod,
+            Status = p.Status.ToString(),
+            CreatedAt = p.CreatedAt
+        }).ToList();
+    }
+
+    public async Task<PaymentResponse?> GetPaymentByIdAsync(int id)
+    {
+        var payment = await _db.Payments
+            .Include(p => p.Transaction)
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        if (payment is null) return null;
+
+        return new PaymentResponse
+        {
+            PaymentId = payment.Id,
+            Code = payment.Code,
+            TransactionId = payment.TransactionId,
+            TransactionCode = payment.Transaction?.TransactionCode ?? string.Empty,
+            TotalAmount = payment.Transaction?.TotalAmount ?? 0m,
+            PaidAmount = payment.AmountPaid,
+            ChangeAmount = payment.ChangeAmount,
+            PaymentMethod = payment.PaymentMethod,
+            Status = payment.Status.ToString(),
+            CreatedAt = payment.CreatedAt
+        };
+    }
 }

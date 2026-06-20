@@ -41,7 +41,7 @@ public class HistoryControllerTests : IDisposable
     [Fact]
     public async Task GetAll_ShouldReturnWrappedResponse()
     {
-        var result = await _controller.GetAll();
+        var result = await _controller.GetAll(null, null, null, 1, 20);
 
         var ok = Assert.IsType<OkObjectResult>(result.Result);
         var response = Assert.IsType<ApiResponse<List<TransactionHistoryResponse>>>(ok.Value);
@@ -61,6 +61,61 @@ public class HistoryControllerTests : IDisposable
 
         Assert.True(response.Success);
         Assert.NotNull(response.Data);
+    }
+
+    [Fact]
+    public async Task GetAll_WithDateFilter_ShouldReturnFiltered()
+    {
+        var result = await _controller.GetAll(DateTime.UtcNow.AddDays(-1), DateTime.UtcNow, null, 1, 20);
+
+        var ok = Assert.IsType<OkObjectResult>(result.Result);
+        var response = Assert.IsType<ApiResponse<List<TransactionHistoryResponse>>>(ok.Value);
+
+        Assert.True(response.Success);
+        Assert.Single(response.Data!);
+    }
+
+    [Fact]
+    public async Task GetAll_WithPaymentMethodFilter_ShouldReturnFiltered()
+    {
+        _db.TransactionHistories.Add(new TransactionHistory
+        {
+            Id = 2,
+            TransactionId = 2,
+            TransactionDate = DateTime.UtcNow,
+            PaymentMethod = "qris",
+            TotalAmount = 75_000m
+        });
+        _db.SaveChanges();
+
+        var result = await _controller.GetAll(null, null, "cash", 1, 20);
+
+        var ok = Assert.IsType<OkObjectResult>(result.Result);
+        var response = Assert.IsType<ApiResponse<List<TransactionHistoryResponse>>>(ok.Value);
+
+        Assert.Single(response.Data!);
+        Assert.Equal("cash", response.Data![0].PaymentMethod);
+    }
+
+    [Fact]
+    public async Task GetAll_WithPagination_ShouldRespectLimit()
+    {
+        _db.TransactionHistories.Add(new TransactionHistory
+        {
+            Id = 2,
+            TransactionId = 2,
+            TransactionDate = DateTime.UtcNow.AddHours(-1),
+            PaymentMethod = "qris",
+            TotalAmount = 75_000m
+        });
+        _db.SaveChanges();
+
+        var result = await _controller.GetAll(null, null, null, 1, 1);
+
+        var ok = Assert.IsType<OkObjectResult>(result.Result);
+        var response = Assert.IsType<ApiResponse<List<TransactionHistoryResponse>>>(ok.Value);
+
+        Assert.Single(response.Data!);
     }
 
     public void Dispose()

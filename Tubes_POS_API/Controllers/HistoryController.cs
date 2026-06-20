@@ -23,9 +23,10 @@ namespace Tubes_POS_API.Controllers
 
         // GET api/history
         [HttpGet]
-        public async Task<ActionResult<ApiResponse<List<TransactionHistoryResponse>>>> GetAll()
+        public async Task<ActionResult<ApiResponse<List<TransactionHistoryResponse>>>> GetAll(
+            DateTime? startDate, DateTime? endDate, string? paymentMethod, int page = 1, int limit = 20)
         {
-            var result = await _historyService.GetAllAsync();
+            var result = await _historyService.GetFilteredAsync(startDate, endDate, paymentMethod, page, limit);
 
             return Ok(new ApiResponse<List<TransactionHistoryResponse>>
             {

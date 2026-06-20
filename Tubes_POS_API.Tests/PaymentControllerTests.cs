@@ -123,6 +123,76 @@ public class PaymentControllerTests : IDisposable
         _db.SaveChanges();
     }
 
+    [Fact]
+    public async Task GetAll_ShouldReturnAllPayments()
+    {
+        SeedTransaction();
+        await _controller.Process(new PaymentRequest
+        {
+            TransactionId = 1,
+            PaidAmount = 60_000m,
+            PaymentMethod = "cash"
+        });
+
+        var result = await _controller.GetAll(null, null, null, 1, 20);
+
+        var ok = Assert.IsType<OkObjectResult>(result.Result);
+        var response = Assert.IsType<ApiResponse<List<PaymentResponse>>>(ok.Value);
+
+        Assert.True(response.Success);
+        Assert.Single(response.Data!);
+    }
+
+    [Fact]
+    public async Task GetAll_WithDateFilter_ShouldFilter()
+    {
+        SeedTransaction();
+        await _controller.Process(new PaymentRequest
+        {
+            TransactionId = 1,
+            PaidAmount = 60_000m,
+            PaymentMethod = "cash"
+        });
+
+        var result = await _controller.GetAll(DateTime.UtcNow.AddDays(1), DateTime.UtcNow.AddDays(2), null, 1, 20);
+
+        var ok = Assert.IsType<OkObjectResult>(result.Result);
+        var response = Assert.IsType<ApiResponse<List<PaymentResponse>>>(ok.Value);
+
+        Assert.Empty(response.Data!);
+    }
+
+    [Fact]
+    public async Task GetById_WhenFound_ShouldReturnPayment()
+    {
+        SeedTransaction();
+        await _controller.Process(new PaymentRequest
+        {
+            TransactionId = 1,
+            PaidAmount = 60_000m,
+            PaymentMethod = "cash"
+        });
+
+        var result = await _controller.GetById(1);
+
+        var ok = Assert.IsType<OkObjectResult>(result.Result);
+        var response = Assert.IsType<ApiResponse<PaymentResponse>>(ok.Value);
+
+        Assert.True(response.Success);
+        Assert.Equal(1, response.Data!.PaymentId);
+    }
+
+    [Fact]
+    public async Task GetById_WhenNotFound_ShouldReturn404()
+    {
+        var result = await _controller.GetById(999);
+
+        var notFound = Assert.IsType<NotFoundObjectResult>(result.Result);
+        var response = Assert.IsType<ApiResponse<object>>(notFound.Value);
+
+        Assert.False(response.Success);
+    }
+
     public void Dispose()
     {
         _db.Dispose();

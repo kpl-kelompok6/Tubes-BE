@@ -40,4 +40,24 @@ public class HistoryService
             .Where(h => h.PaymentMethod.ToLower() == method.ToLower())
             .ToListAsync();
     }
+
+    public async Task<List<TransactionHistory>> GetFilteredAsync(DateTime? startDate, DateTime? endDate, string? paymentMethod, int page, int limit)
+    {
+        var query = _context.TransactionHistories.AsQueryable();
+
+        if (startDate.HasValue)
+            query = query.Where(h => h.TransactionDate >= startDate.Value);
+
+        if (endDate.HasValue)
+            query = query.Where(h => h.TransactionDate <= endDate.Value);
+
+        if (!string.IsNullOrWhiteSpace(paymentMethod))
+            query = query.Where(h => h.PaymentMethod.ToLower() == paymentMethod.ToLower());
+
+        return await query
+            .OrderByDescending(h => h.TransactionDate)
+            .Skip((page - 1) * limit)
+            .Take(limit)
+            .ToListAsync();
+    }
 }

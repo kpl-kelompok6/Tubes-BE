@@ -180,6 +180,97 @@ public class PaymentServiceTests : IDisposable
         Assert.Contains("sudah memiliki pembayaran", ex.Message);
     }
 
+    [Fact]
+    public async Task GetAllPaymentsAsync_ShouldReturnAllPayments()
+    {
+        await _service.ProcessPaymentAsync(new PaymentRequest
+        {
+            TransactionId = 1,
+            PaidAmount = 60_000m,
+            PaymentMethod = "cash"
+        });
+
+        var results = await _service.GetAllPaymentsAsync(null, null, null, 1, 20);
+
+        Assert.Single(results);
+        Assert.Equal(50_000m, results[0].TotalAmount);
+    }
+
+    [Fact]
+    public async Task GetAllPaymentsAsync_WithPaymentMethodFilter_ShouldFilter()
+    {
+        await _service.ProcessPaymentAsync(new PaymentRequest
+        {
+            TransactionId = 1,
+            PaidAmount = 60_000m,
+            PaymentMethod = "cash"
+        });
+
+        var results = await _service.GetAllPaymentsAsync(null, null, "qris", 1, 20);
+
+        Assert.Empty(results);
+    }
+
+    [Fact]
+    public async Task GetAllPaymentsAsync_WithPagination_ShouldRespectLimit()
+    {
+        var service1 = new PaymentService(_db, new PaymentStateMachine());
+        await service1.ProcessPaymentAsync(new PaymentRequest
+        {
+            TransactionId = 1,
+            PaidAmount = 60_000m,
+            PaymentMethod = "cash"
+        });
+
+        _db.Transactions.Add(new Transaction
+        {
+            Id = 3,
+            TransactionCode = "TRX-TEST3",
+            TotalAmount = 30_000m,
+            Status = Entities.Enums.TransactionStatus.Created,
+            CreatedAt = DateTime.UtcNow,
+            Items = [new TransactionItem { Id = 3, TransactionId = 3, MenuId = 1, Quantity = 1, UnitPrice = 30_000m }]
+        });
+        _db.SaveChanges();
+
+        var service2 = new PaymentService(_db, new PaymentStateMachine());
+        await service2.ProcessPaymentAsync(new PaymentRequest
+        {
+            TransactionId = 3,
+            PaidAmount = 30_000m,
+            PaymentMethod = "cash"
+        });
+
+        var results = await _service.GetAllPaymentsAsync(null, null, null, 1, 1);
+
+        Assert.Single(results);
+    }
+
+    [Fact]
+    public async Task GetPaymentByIdAsync_WhenFound_ShouldReturnPayment()
+    {
+        await _service.ProcessPaymentAsync(new PaymentRequest
+        {
+            TransactionId = 1,
+            PaidAmount = 60_000m,
+            PaymentMethod = "cash"
+        });
+
+        var result = await _service.GetPaymentByIdAsync(1);
+
+        Assert.NotNull(result);
+        Assert.Equal(1, result!.PaymentId);
+        Assert.Equal(50_000m, result.TotalAmount);
+    }
+
+    [Fact]
+    public async Task GetPaymentByIdAsync_WhenNotFound_ShouldReturnNull()
+    {
+        var result = await _service.GetPaymentByIdAsync(999);
+
+        Assert.Null(result);
+    }
+
     public void Dispose()
     {
         _db.Dispose();
