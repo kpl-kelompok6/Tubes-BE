@@ -104,9 +104,14 @@ namespace Tubes_POS_API.Controllers
                 Id = history.Id,
                 Code = history.Code,
                 TransactionId = history.TransactionId,
-                TransactionDate = history.TransactionDate,
+                TransactionCode = history.TransactionCode,
+                CreatedAt = history.CreatedAt,
+                CustomerName = history.CustomerName,
+                TableNumber = history.TableNumber,
                 PaymentMethod = history.PaymentMethod,
                 TotalAmount = history.TotalAmount,
+                PaidAmount = history.PaidAmount,
+                Change = history.Change,
                 CashierName = history.CashierName
             };
         }

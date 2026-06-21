@@ -7,5 +7,6 @@ public sealed class TransactionItemResponse
     public string MenuName { get; set; } = string.Empty;
     public int Quantity { get; set; }
     public decimal UnitPrice { get; set; }
+    public decimal BasePrice { get; set; }
     public decimal Subtotal { get; set; }
 }

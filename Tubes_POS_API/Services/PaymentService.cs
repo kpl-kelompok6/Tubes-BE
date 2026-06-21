@@ -80,9 +80,14 @@ public sealed class PaymentService : IPaymentService
         {
             Code = CodeHelper.GenerateCode("HIST"),
             TransactionId = transaction.Id,
-            TransactionDate = DateTime.UtcNow,
+            TransactionCode = transaction.TransactionCode,
+            CreatedAt = DateTime.UtcNow,
+            CustomerName = transaction.CustomerName,
+            TableNumber = transaction.TableNumber,
             PaymentMethod = paymentMethod,
             TotalAmount = totalAmount,
+            PaidAmount = request.PaidAmount,
+            Change = change,
             CashierName = transaction.Cashier?.DisplayName
         });
 

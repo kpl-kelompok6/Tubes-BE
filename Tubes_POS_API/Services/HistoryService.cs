@@ -16,7 +16,7 @@ public class HistoryService
     public async Task<List<TransactionHistory>> GetAllAsync()
     {
         return await _context.TransactionHistories
-            .OrderByDescending(h => h.TransactionDate)
+            .OrderByDescending(h => h.CreatedAt)
             .ToListAsync();
     }
 
@@ -29,8 +29,8 @@ public class HistoryService
     public async Task<List<TransactionHistory>> GetByDateRangeAsync(DateTime start, DateTime end)
     {
         return await _context.TransactionHistories
-            .Where(h => h.TransactionDate >= start && h.TransactionDate <= end)
-            .OrderByDescending(h => h.TransactionDate)
+            .Where(h => h.CreatedAt >= start && h.CreatedAt <= end)
+            .OrderByDescending(h => h.CreatedAt)
             .ToListAsync();
     }
 
@@ -46,16 +46,16 @@ public class HistoryService
         var query = _context.TransactionHistories.AsQueryable();
 
         if (startDate.HasValue)
-            query = query.Where(h => h.TransactionDate >= startDate.Value);
+            query = query.Where(h => h.CreatedAt >= startDate.Value);
 
         if (endDate.HasValue)
-            query = query.Where(h => h.TransactionDate <= endDate.Value);
+            query = query.Where(h => h.CreatedAt <= endDate.Value);
 
         if (!string.IsNullOrWhiteSpace(paymentMethod))
             query = query.Where(h => h.PaymentMethod.ToLower() == paymentMethod.ToLower());
 
         return await query
-            .OrderByDescending(h => h.TransactionDate)
+            .OrderByDescending(h => h.CreatedAt)
             .Skip((page - 1) * limit)
             .Take(limit)
             .ToListAsync();

@@ -26,9 +26,9 @@ public sealed class AppDbContext : DbContext
             entity.HasIndex(m => m.Category);
 
             entity.HasData(
-                new Menu { Id = 1, Code = "MENU-20250101-a1b2c3d4", Name = "Nasi Goreng Spesial", Price = 25000m, Category = "Makanan", IsAvailable = true, ImageUrl = "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400" },
-                new Menu { Id = 2, Code = "MENU-20250101-e5f6g7h8", Name = "Es Teh Manis", Price = 5000m, Category = "Minuman", IsAvailable = true, ImageUrl = "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400" },
-                new Menu { Id = 3, Code = "MENU-20250101-i9j0k1l2", Name = "Kopi Hitam", Price = 10000m, Category = "Minuman", IsAvailable = true, ImageUrl = "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400" }
+                new Menu { Id = 1, Code = "MENU-20250101-a1b2c3d4", Name = "Nasi Goreng Spesial", Price = 25000m, Category = "Makanan", IsAvailable = true, ImageUrl = "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400", CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+                new Menu { Id = 2, Code = "MENU-20250101-e5f6g7h8", Name = "Es Teh Manis", Price = 5000m, Category = "Minuman", IsAvailable = true, ImageUrl = "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400", CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
+                new Menu { Id = 3, Code = "MENU-20250101-i9j0k1l2", Name = "Kopi Hitam", Price = 10000m, Category = "Minuman", IsAvailable = true, ImageUrl = "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400", CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
             );
         });
 
@@ -74,7 +74,7 @@ public sealed class AppDbContext : DbContext
         modelBuilder.Entity<TransactionHistory>(entity =>
         {
             entity.HasIndex(h => h.Code).IsUnique();
-            entity.HasIndex(h => h.TransactionDate);
+            entity.HasIndex(h => h.CreatedAt);
         });
 
         modelBuilder.Entity<Employee>().HasData(
@@ -82,7 +82,7 @@ public sealed class AppDbContext : DbContext
             {
                 Id = 1,
                 Username = "admin",
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
+                PasswordHash = "$2a$11$sVzuU0jygw07Bz0nURepHOZrBm6B1cDs5D4FaCQXoUVF2hO6WtdBW",
                 DisplayName = "Admin Utama",
                 Role = EmployeeRole.Admin,
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)

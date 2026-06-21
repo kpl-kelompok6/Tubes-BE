@@ -117,7 +117,8 @@ public sealed class TransactionService : ITransactionService
                 TransactionId = transaction.Id,
                 MenuId = request.MenuId,
                 Quantity = request.Quantity,
-                UnitPrice = unitPrice
+                UnitPrice = unitPrice,
+                BasePrice = menu.Price
             });
         }
 
@@ -251,6 +252,7 @@ public sealed class TransactionService : ITransactionService
                 MenuName = i.Menu?.Name ?? string.Empty,
                 Quantity = i.Quantity,
                 UnitPrice = i.UnitPrice,
+                BasePrice = i.BasePrice,
                 Subtotal = i.Subtotal,
             }).ToList(),
         };

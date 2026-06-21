@@ -23,6 +23,9 @@ public sealed class TransactionItem
     [Precision(18, 2)]
     public decimal UnitPrice { get; set; }
 
+    [Precision(18, 2)]
+    public decimal BasePrice { get; set; }
+
     [NotMapped]
     public decimal Subtotal => Quantity * UnitPrice;
 
